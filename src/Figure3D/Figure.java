@@ -2,26 +2,52 @@ package Figure3D;
 
 import java.util.ArrayList;
 import java.awt.*;
+import java.awt.geom.*;
 
 public class Figure {
     private ArrayList<FigureFace> faces;
     int distance = 1000;
     int mz = -350;
     int despx, despy;
+    Color color;
 
     public Figure(){
         faces = genFigure();
+        color = new Color(150,255,255);
+        despx = 300; despy = 200;
     }
 
     public void setDistance(int dist){
         distance = dist;
     }
 
-    public void paint(Graphics g){
-        for (FigureFace figureFace : faces) {
-            
+    public void paint(Graphics2D g2){
+        //Elegir orden de pintado
+        ArrayList<double[]> arr = new ArrayList<>();
+        for (int i = 0; i < faces.size(); i++) 
+            arr.add(new double[]{i, faces.get(i).getMaxZ()});
+        order(arr);
+
+        for (double[] ds : arr) {
+           FigureFace f = faces.get((int)ds[0]);
+           Shape f2D = f.get2DShape(distance, mz, despx, despy);
+           g2.setPaint(color);
+           g2.fill(f2D);
+           g2.setPaint(new Color(0,0,0,190));
+           g2.setStroke(new BasicStroke(1));
+           g2.draw(f2D);
+           //System.out.println(f2D.getBounds2D());
+           int opacity = (int)(255*f.getSlope()*0.6);
+        //    System.out.println("Slope -> "+f.getSlope());
+        //    System.out.println(opacity);
+           if(opacity>255) opacity=255;
+           if(opacity<0) opacity=0;
+           g2.setPaint(new Color(0,0,0,opacity));
+           g2.fill(f2D);
         }
     }
+
+
 
     public void move(int cx, int cy){
         despx = cx;
@@ -36,6 +62,18 @@ public class Figure {
                 figureFace.face[i].z = figureFace.face[i].z*=s;
             }
         }
+    }
+
+    private void order(ArrayList<double[]> arr) {
+        for (int x = 0; x < arr.size(); x++) {
+            for (int i = 0; i < arr.size()-x-1; i++) {
+                if(arr.get(i)[1] < arr.get(i+1)[1]){
+                    double tmp[] = {arr.get(i+1)[0],arr.get(i+1)[1]};
+                    arr.set(i+1, arr.get(i));
+                    arr.set(i, tmp);
+                }
+            }
+        } 
     }
 
 
