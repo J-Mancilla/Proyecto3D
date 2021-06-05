@@ -13,7 +13,7 @@ public class Figure {
 
     public Figure(){
         faces = genFigure();
-        color = new Color(150,255,255);
+        color = new Color(116,144,175,180);
         despx = 300; despy = 200;
     }
 
@@ -22,10 +22,15 @@ public class Figure {
     }
 
     public void paint(Graphics2D g2){
-        //Elegir orden de pintado
+        //Elegir orden de pintado y sombreado maximo
+        //double maxSlope = 0;
         ArrayList<double[]> arr = new ArrayList<>();
-        for (int i = 0; i < faces.size(); i++) 
-            arr.add(new double[]{i, faces.get(i).getMaxZ()});
+        for (int i = 0; i < faces.size(); i++){
+            double slope = faces.get(i).getSlope();
+            // if(slope > maxSlope)
+            //     maxSlope = slope;
+            arr.add(new double[]{i, faces.get(i).getOrder(), slope});
+        }
         order(arr);
 
         for (double[] ds : arr) {
@@ -33,15 +38,11 @@ public class Figure {
            Shape f2D = f.get2DShape(distance, mz, despx, despy);
            g2.setPaint(color);
            g2.fill(f2D);
-           g2.setPaint(new Color(0,0,0,190));
+           g2.setPaint(new Color(0,0,0,40));
            g2.setStroke(new BasicStroke(1));
            g2.draw(f2D);
-           //System.out.println(f2D.getBounds2D());
-           int opacity = (int)(255*f.getSlope()*0.6);
-        //    System.out.println("Slope -> "+f.getSlope());
-        //    System.out.println(opacity);
-           if(opacity>255) opacity=255;
-           if(opacity<0) opacity=0;
+           //int opacity = (int)(ds[2]/maxSlope*150);
+           int opacity = (int)(ds[2]);
            g2.setPaint(new Color(0,0,0,opacity));
            g2.fill(f2D);
         }
@@ -64,11 +65,33 @@ public class Figure {
         }
     }
 
+    public void rotacionXYZH(int grx, int gry, int grz){
+        double radx = Math.toRadians(grx),
+               ca1  = Math.cos(radx),
+               sa1  = Math.sin(radx);
+        double rady = Math.toRadians(gry),
+               ca2  = Math.cos(rady),
+               sa2  = Math.sin(rady);
+        double radz = Math.toRadians(grz),
+               ca3  = Math.cos(radz),
+               sa3  = Math.sin(radz);
+        for (FigureFace figureFace : faces) {
+            for (int i = 0; i < figureFace.face.length; i++) {
+                double x = figureFace.face[i].x,
+                       y = figureFace.face[i].y,
+                       z = figureFace.face[i].z; 
+                figureFace.face[i].x = x*(ca2*ca3)+y*((sa1*-sa2)*ca3+(ca1*-sa3))+z*((ca1*-sa2)*ca3+(-sa1*-sa3));
+                figureFace.face[i].y = x*(ca2*sa3)+y*((sa1*-sa2)*sa3+(ca1*ca3))+z*((ca1*-sa2)*sa3+(-sa1*ca3));
+                figureFace.face[i].z = x*sa2+y*(sa1*ca2)+z*(ca1*ca2);
+            }
+        }
+    }
+
     private void order(ArrayList<double[]> arr) {
         for (int x = 0; x < arr.size(); x++) {
             for (int i = 0; i < arr.size()-x-1; i++) {
-                if(arr.get(i)[1] < arr.get(i+1)[1]){
-                    double tmp[] = {arr.get(i+1)[0],arr.get(i+1)[1]};
+                if(arr.get(i)[1] > arr.get(i+1)[1]){
+                    double tmp[] = {arr.get(i+1)[0],arr.get(i+1)[1],arr.get(i+1)[2]};
                     arr.set(i+1, arr.get(i));
                     arr.set(i, tmp);
                 }
@@ -88,6 +111,7 @@ public class Figure {
             new Point3D(-1.02, -7.25, 15.5),
             new Point3D(1.02, -7.25, 15.5),
             new Point3D(1.02, -7.25, 16.5),
+            new Point3D(1.52, -7.25, 16.5),
             new Point3D(1.52, -7.25, 12.5),
             new Point3D(12.5, -7.25, 12.5),
             new Point3D(12.5, -7.25, 1.52),
@@ -101,7 +125,7 @@ public class Figure {
             new Point3D(12.5, -7.25, -12.5),
             new Point3D(1.52, -7.25, -12.5),
             new Point3D(1.52, -7.25, -16.5),
-            new Point3D(1.02, -7.25, -15.5),
+            new Point3D(1.02, -7.25, -16.5),
             new Point3D(1.02, -7.25, -15.5),
             new Point3D(-1.02, -7.25, -15.5),
             new Point3D(-1.02, -7.25, -16.5),
@@ -838,6 +862,7 @@ public class Figure {
             new Point3D( -1.52 ,  5.75,  2.77),
             new Point3D(  1.48 ,  5.75,  2.77),
             new Point3D(  1.48 ,  2.75,  2.77),
+            new Point3D(  1.23 ,  2.75,  2.77),
             new Point3D(  1.23 ,  5.50,  2.77),
             new Point3D( -1.27 ,  5.50,  2.77),
             new Point3D( -1.27 ,  2.75,  2.77)

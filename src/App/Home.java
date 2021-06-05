@@ -17,18 +17,21 @@ public class Home extends JPanel{
     Figure f;
     JSlider sldX, sldY, sldZ, sldS;
     boolean arrastrar = false;
+    int rotaX, rotaY, rotaZ;
 
     public Home(){
         win = new JFrame("Transformaciones en 3D");
-        win.setSize(800,600);
+        win.setSize(1080,720);
         win.add(this);
         f = new Figure();
+        rotaX = rotaY = rotaZ = 0;
 
         sldX = new JSlider(JSlider.HORIZONTAL, 0, 360, 0);
         sldX.setMinorTickSpacing(15);
         sldX.setMajorTickSpacing(90);
         sldX.setPaintTicks(true);
         sldX.setPaintLabels(true);
+        sldX.setPaintTrack(true);
         JPanel ps1 = new JPanel(new GridLayout(1,1));
         TitledBorder tb1 = new TitledBorder("Rotar en eje X");
         tb1.setTitleJustification(TitledBorder.CENTER);
@@ -70,20 +73,35 @@ public class Home extends JPanel{
 
         sldX.addChangeListener(new ChangeListener(){
             public void stateChanged(ChangeEvent e) {
-                //f.rotacionXYZH(sldX.getValue(), sldY.getValue(), sldZ.getValue());
-                repaint();
+                if(sldX.getValue()!=rotaX){
+                    f.rotacionXYZH(-rotaX, 0, 0);
+                    rotaX = sldX.getValue();
+                    f.rotacionXYZH(rotaX, 0, 0);
+                    repaint();
+                    System.out.println("x"+sldX.getValue());
+                }
             }
         });
         sldY.addChangeListener(new ChangeListener(){
             public void stateChanged(ChangeEvent e) {
-                //f.rotacionXYZH(sldX.getValue(), sldY.getValue(), sldZ.getValue());
-                repaint();
+                if(sldY.getValue()!=rotaY){
+                    f.rotacionXYZH(0, -rotaY, 0);
+                    rotaY = sldY.getValue();
+                    f.rotacionXYZH(0, rotaY, 0);
+                    repaint();
+                    System.out.println("y"+sldY.getValue());
+                }
             }
         });
         sldZ.addChangeListener(new ChangeListener(){
             public void stateChanged(ChangeEvent e) {
-                //f.rotacionXYZH(sldX.getValue(), sldY.getValue(), sldZ.getValue());
-                repaint();
+                if(sldZ.getValue()!=rotaZ){
+                    f.rotacionXYZH(0, 0, -rotaZ);
+                    rotaZ = sldZ.getValue();
+                    f.rotacionXYZH(0, 0, rotaZ);
+                    repaint();
+                    System.out.println("z"+sldZ.getValue());
+                }
             }
         });
         sldS.addChangeListener(new ChangeListener(){
