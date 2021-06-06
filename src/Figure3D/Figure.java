@@ -6,15 +6,14 @@ import java.awt.geom.*;
 
 public class Figure {
     private ArrayList<FigureFace> faces;
-    int distance = 1000;
+    int distance;
     int mz = -350;
     int despx, despy;
     Color color;
 
     public Figure(){
         faces = genFigure();
-        color = new Color(116,144,175,180);
-        despx = 300; despy = 200;
+        reset();
     }
 
     public void setDistance(int dist){
@@ -48,24 +47,41 @@ public class Figure {
         }
     }
 
+    public void reset(){
+        color = new Color(116,144,175,175);
+        distance = 5500;
+        despx = 500; despy = 300;
+        for (FigureFace figureFace : faces) 
+            figureFace.reset(); 
+    }
 
+    public boolean contains(int x, int y){
+        for (FigureFace figureFace : faces) 
+            if(figureFace.get2DShape(distance, mz, despx, despy).contains(x, y))
+                return true;
+        return false;
+    }
 
     public void move(int cx, int cy){
-        despx = cx;
-        despy = cy;
+        despx += cx;
+        despy += cy;
     }
 
     public void scale(double s){
+        scale(s, s, s);
+    }
+
+    public void scale(double sx, double sy, double sz){
         for (FigureFace figureFace : faces) {
             for (int i = 0; i < figureFace.face.length; i++) {
-                figureFace.face[i].x = figureFace.face[i].x*=s;
-                figureFace.face[i].y = figureFace.face[i].y*=s;
-                figureFace.face[i].z = figureFace.face[i].z*=s;
+                figureFace.face[i].x = figureFace.originalFace[i].x = figureFace.face[i].x*=sx;
+                figureFace.face[i].y = figureFace.originalFace[i].y = figureFace.face[i].y*=sy;
+                figureFace.face[i].z = figureFace.originalFace[i].z = figureFace.face[i].z*=sz;
             }
         }
     }
 
-    public void rotacionXYZH(int grx, int gry, int grz){
+    public void rotate(int grx, int gry, int grz){
         double radx = Math.toRadians(grx),
                ca1  = Math.cos(radx),
                sa1  = Math.sin(radx);
@@ -77,12 +93,58 @@ public class Figure {
                sa3  = Math.sin(radz);
         for (FigureFace figureFace : faces) {
             for (int i = 0; i < figureFace.face.length; i++) {
-                double x = figureFace.face[i].x,
-                       y = figureFace.face[i].y,
-                       z = figureFace.face[i].z; 
+                double x = figureFace.originalFace[i].x,
+                       y = figureFace.originalFace[i].y,
+                       z = figureFace.originalFace[i].z; 
                 figureFace.face[i].x = x*(ca2*ca3)+y*((sa1*-sa2)*ca3+(ca1*-sa3))+z*((ca1*-sa2)*ca3+(-sa1*-sa3));
                 figureFace.face[i].y = x*(ca2*sa3)+y*((sa1*-sa2)*sa3+(ca1*ca3))+z*((ca1*-sa2)*sa3+(-sa1*ca3));
                 figureFace.face[i].z = x*sa2+y*(sa1*ca2)+z*(ca1*ca2);
+            }
+        }
+    }
+
+    public void rotateX(int degrees){
+        double rad = Math.toRadians(degrees),
+               cos = Math.cos(rad),
+               sen = Math.sin(rad);
+        for (FigureFace figureFace : faces) {
+            for (int i = 0; i < figureFace.face.length; i++) {
+                double x = figureFace.face[i].x,
+                       y = figureFace.face[i].y,
+                       z = figureFace.face[i].z; 
+                figureFace.face[i].x = x;
+                figureFace.face[i].y = y*cos-z*sen;
+                figureFace.face[i].z = y*sen+z*cos;
+            }
+        }
+    }
+    public void rotateY(int degrees){
+        double rad = Math.toRadians(degrees),
+               cos = Math.cos(rad),
+               sen = Math.sin(rad);
+        for (FigureFace figureFace : faces) {
+            for (int i = 0; i < figureFace.face.length; i++) {
+                double x = figureFace.face[i].x,
+                       y = figureFace.face[i].y,
+                       z = figureFace.face[i].z; 
+                figureFace.face[i].x = x*cos-z*sen;
+                figureFace.face[i].y = y;
+                figureFace.face[i].z = x*sen+z*cos;
+            }
+        }
+    }
+    public void rotateZ(int degrees){
+        double rad = Math.toRadians(degrees),
+               cos = Math.cos(rad),
+               sen = Math.sin(rad);
+        for (FigureFace figureFace : faces) {
+            for (int i = 0; i < figureFace.face.length; i++) {
+                double x = figureFace.face[i].x,
+                       y = figureFace.face[i].y,
+                       z = figureFace.face[i].z; 
+                figureFace.face[i].x = x*cos-y*sen;
+                figureFace.face[i].y = x*sen+y*cos;
+                figureFace.face[i].z = z;
             }
         }
     }

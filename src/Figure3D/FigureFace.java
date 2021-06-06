@@ -5,10 +5,23 @@ import java.awt.*;
 public class FigureFace {
     Point3D face[];
     Point3D originalFace[];
+    private Point3D ori[];
 
     public FigureFace(Point3D points[]){
         face = points.clone();
-        originalFace = points.clone();
+        originalFace = new Point3D[face.length];
+        ori = new Point3D[face.length];
+        for (int i = 0; i < face.length; i++){
+            originalFace[i] = new Point3D(face[i].x, face[i].y, face[i].z);
+            ori[i]          = new Point3D(face[i].x, face[i].y, face[i].z);
+        }
+    }
+
+    public void reset(){
+        for (int i = 0; i < face.length; i++) {
+            originalFace[i] = new Point3D(ori[i].x, ori[i].y, ori[i].z);
+            face[i]         = new Point3D(ori[i].x, ori[i].y, ori[i].z);
+        }
     }
 
     public Point2D[] get2D(int distance, int mz){
