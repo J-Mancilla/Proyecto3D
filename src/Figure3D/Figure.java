@@ -2,7 +2,6 @@ package Figure3D;
 
 import java.util.ArrayList;
 import java.awt.*;
-import java.awt.geom.*;
 
 public class Figure {
     private ArrayList<FigureFace> faces;
@@ -18,6 +17,13 @@ public class Figure {
 
     public void setDistance(int dist){
         distance = dist;
+    }
+
+    public void setSolid(boolean solid){
+        if(solid)
+            color = new Color(116,144,175);
+        else
+            color = new Color(116,144,175,175);
     }
 
     public void paint(Graphics2D g2){
@@ -50,7 +56,7 @@ public class Figure {
     public void reset(){
         color = new Color(116,144,175,175);
         distance = 5500;
-        despx = 500; despy = 300;
+        despx = 500; despy = 260;
         for (FigureFace figureFace : faces) 
             figureFace.reset(); 
     }
@@ -74,9 +80,12 @@ public class Figure {
     public void scale(double sx, double sy, double sz){
         for (FigureFace figureFace : faces) {
             for (int i = 0; i < figureFace.face.length; i++) {
-                figureFace.face[i].x = figureFace.originalFace[i].x = figureFace.face[i].x*=sx;
-                figureFace.face[i].y = figureFace.originalFace[i].y = figureFace.face[i].y*=sy;
-                figureFace.face[i].z = figureFace.originalFace[i].z = figureFace.face[i].z*=sz;
+                figureFace.originalFace[i].x*=sx; 
+                figureFace.originalFace[i].y*=sy; 
+                figureFace.originalFace[i].z*=sz; 
+                figureFace.face[i].x*=sx;
+                figureFace.face[i].y*=sy;
+                figureFace.face[i].z*=sz;
             }
         }
     }
@@ -99,53 +108,134 @@ public class Figure {
                 figureFace.face[i].x = x*(ca2*ca3)+y*((sa1*-sa2)*ca3+(ca1*-sa3))+z*((ca1*-sa2)*ca3+(-sa1*-sa3));
                 figureFace.face[i].y = x*(ca2*sa3)+y*((sa1*-sa2)*sa3+(ca1*ca3))+z*((ca1*-sa2)*sa3+(-sa1*ca3));
                 figureFace.face[i].z = x*sa2+y*(sa1*ca2)+z*(ca1*ca2);
+                x = figureFace.original[i].x;
+                y = figureFace.original[i].y;
+                z = figureFace.original[i].z;
+                figureFace.withRot[i].x = x*(ca2*ca3)+y*((sa1*-sa2)*ca3+(ca1*-sa3))+z*((ca1*-sa2)*ca3+(-sa1*-sa3));
+                figureFace.withRot[i].y = x*(ca2*sa3)+y*((sa1*-sa2)*sa3+(ca1*ca3))+z*((ca1*-sa2)*sa3+(-sa1*ca3));
+                figureFace.withRot[i].z = x*sa2+y*(sa1*ca2)+z*(ca1*ca2);
             }
         }
     }
 
-    public void rotateX(int degrees){
+    public ArrayList<FigureFace> rotateX(int degrees, boolean reactive){
+        ArrayList<FigureFace> fig = new ArrayList<>();
         double rad = Math.toRadians(degrees),
                cos = Math.cos(rad),
                sen = Math.sin(rad);
         for (FigureFace figureFace : faces) {
+            Point3D points[] = new Point3D[figureFace.face.length];
             for (int i = 0; i < figureFace.face.length; i++) {
-                double x = figureFace.face[i].x,
-                       y = figureFace.face[i].y,
-                       z = figureFace.face[i].z; 
-                figureFace.face[i].x = x;
-                figureFace.face[i].y = y*cos-z*sen;
-                figureFace.face[i].z = y*sen+z*cos;
+                double x, y, z;
+                if(reactive){
+                    x = figureFace.withRot[i].x;
+                    y = figureFace.withRot[i].y;
+                    z = figureFace.withRot[i].z; 
+                }else{
+                    x = figureFace.original[i].x;
+                    y = figureFace.original[i].y;
+                    z = figureFace.original[i].z; 
+                }
+                points[i]= new Point3D(
+                                        x,
+                                        y*cos-z*sen,
+                                        y*sen+z*cos
+                                    );
             }
+            fig.add(new FigureFace(points));
         }
+        return fig;
     }
-    public void rotateY(int degrees){
+    public ArrayList<FigureFace> rotateY(int degrees, boolean reactive){
+        ArrayList<FigureFace> fig = new ArrayList<>();
         double rad = Math.toRadians(degrees),
                cos = Math.cos(rad),
                sen = Math.sin(rad);
         for (FigureFace figureFace : faces) {
+            Point3D points[] = new Point3D[figureFace.face.length];
             for (int i = 0; i < figureFace.face.length; i++) {
-                double x = figureFace.face[i].x,
-                       y = figureFace.face[i].y,
-                       z = figureFace.face[i].z; 
-                figureFace.face[i].x = x*cos-z*sen;
-                figureFace.face[i].y = y;
-                figureFace.face[i].z = x*sen+z*cos;
+                double x, y, z;
+                if(reactive){
+                    x = figureFace.withRot[i].x;
+                    y = figureFace.withRot[i].y;
+                    z = figureFace.withRot[i].z;
+                }else{
+                    x = figureFace.original[i].x;
+                    y = figureFace.original[i].y;
+                    z = figureFace.original[i].z;
+                }
+                points[i]= new Point3D(
+                                        x*cos-z*sen,
+                                        y,
+                                        x*sen+z*cos
+                                    );
             }
+            fig.add(new FigureFace(points));
         }
+        return fig;
     }
-    public void rotateZ(int degrees){
-        double rad = Math.toRadians(degrees),
-               cos = Math.cos(rad),
-               sen = Math.sin(rad);
+    public ArrayList<FigureFace> getCopy(boolean reactive){
+        ArrayList<FigureFace> fig = new ArrayList<>();
         for (FigureFace figureFace : faces) {
+            Point3D points[] = new Point3D[figureFace.face.length];
             for (int i = 0; i < figureFace.face.length; i++) {
-                double x = figureFace.face[i].x,
-                       y = figureFace.face[i].y,
-                       z = figureFace.face[i].z; 
-                figureFace.face[i].x = x*cos-y*sen;
-                figureFace.face[i].y = x*sen+y*cos;
-                figureFace.face[i].z = z;
+                if(reactive){
+                    points[i]= new Point3D( 
+                                        figureFace.withRot[i].x,
+                                        figureFace.withRot[i].y,
+                                        figureFace.withRot[i].z
+                                    );
+                }else{
+                    points[i]= new Point3D( 
+                                        figureFace.original[i].x,
+                                        figureFace.original[i].y,
+                                        figureFace.original[i].z
+                                    );
+                }
             }
+            fig.add(new FigureFace(points));
+        }
+        return fig;
+    }
+
+    public void topView(Graphics2D g2, int x, int y, boolean reactive){
+        ArrayList<FigureFace> ft = rotateX(90, reactive);
+        for (FigureFace figureFace : ft) 
+            for (int i = 0; i < figureFace.face.length; i++)
+                figureFace.face[i].z  = 0;
+        paintView(g2, ft, x, y);
+    }
+    public void sideView(Graphics2D g2, int x, int y, boolean reactive){
+        ArrayList<FigureFace> ft = rotateY(90, reactive);
+        for (FigureFace figureFace : ft) 
+            for (int i = 0; i < figureFace.face.length; i++)
+                figureFace.face[i].z  = 0;
+        paintView(g2, ft, x, y);
+    }
+    public void frontView(Graphics2D g2, int x, int y, boolean reactive){
+        //double figT[][] = rotacionY(90);
+        ArrayList<FigureFace> ft = getCopy(reactive);
+        paintView(g2, ft, x, y);
+    }
+
+    public void paintView(Graphics2D g2, ArrayList<FigureFace> figT, int x, int y){
+        ArrayList<double[]> arr = new ArrayList<>();
+        for (int i = 0; i < figT.size(); i++){
+            double slope = figT.get(i).getSlope();
+            arr.add(new double[]{i, figT.get(i).getOrder(), slope});
+        }
+        order(arr);
+        for (double[] ds : arr) {
+           FigureFace f = figT.get((int)ds[0]);
+           Shape f2D = f.get2DShape(900, -350, x, y);
+           g2.setPaint(new Color(100,100,100,115));
+           g2.fill(f2D);
+           g2.setPaint(new Color(255,255,255,40));
+           g2.setStroke(new BasicStroke(1));
+           g2.draw(f2D);
+           int opacity = (int)(ds[2]);
+           g2.setPaint(new Color(0,0,0,opacity));
+           g2.fill(f2D);
         }
     }
 

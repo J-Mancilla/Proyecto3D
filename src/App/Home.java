@@ -9,8 +9,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -29,6 +31,9 @@ public class Home extends JPanel implements ChangeListener{
     boolean move = false;
     int tx, ty, x, y;
     String lblX, lblY;
+    ViewsDialog views;
+    JToggleButton showBtn, reactive;
+    
     //int rotaX, rotaY, rotaZ;
 
     public Home(){
@@ -38,6 +43,7 @@ public class Home extends JPanel implements ChangeListener{
         setBackground(new Color(238,238,238));
         win.add(this);
         f = new Figure();
+        views = new ViewsDialog(win, f);
         lblX = lblY = "";
         //rotaX = rotaY = rotaZ = 0;
 
@@ -182,6 +188,15 @@ public class Home extends JPanel implements ChangeListener{
             }
         });
 
+        win.addComponentListener(new ComponentAdapter(){
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                if(showBtn.isSelected()){
+                    Home.this.setDialogLocation();
+                }
+            }
+        });
+
         win.setVisible(true);
         win.setResizable(false);
         win.setLocationRelativeTo(null);
@@ -232,32 +247,198 @@ public class Home extends JPanel implements ChangeListener{
     private void createToolBar() {
         JToolBar toolBar = new JToolBar("", JToolBar.HORIZONTAL);
         toolBar.setBackground(getBackground());
+        JToggleButton solidBtn = new JToggleButton(new ImageIcon(getClass().getResource("/img/BtnTra.png")));
+        solidBtn.setSelectedIcon(new ImageIcon(getClass().getResource("/img/BtnSol.png")));
+        solidBtn.setToolTipText("Cambiar el estilo de visualización");
+        solidBtn.setFocusable(false);
+        solidBtn.setBorder(null);
+        solidBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        solidBtn.setSelected(false);
+        solidBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.setSolid(solidBtn.isSelected());
+                repaint();
+            }
+        });
+
+        showBtn = new JToggleButton(new ImageIcon(getClass().getResource("/img/Show.png")));
+        showBtn.setSelectedIcon(new ImageIcon(getClass().getResource("/img/NoShow.png")));
+        showBtn.setToolTipText("Mostrar/Ocultar vistas de la figura");
+        showBtn.setFocusable(false);
+        showBtn.setBorder(null);
+        showBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        showBtn.setSelected(false);
+        showBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(showBtn.isSelected()){
+                    setDialogLocation();
+                    views.dialog.setVisible(true);
+                    reactive.setVisible(true);
+                }else{
+                    views.dialog.setVisible(false);
+                    reactive.setVisible(false);
+                }
+                repaint();
+            }
+        });
+
+        reactive = new JToggleButton(new ImageIcon(getClass().getResource("/img/Reactive.png")));
+        reactive.setSelectedIcon(new ImageIcon(getClass().getResource("/img/ReactiveS.png")));
+        reactive.setToolTipText("Activar/Desactivar vistas dinámicas (Rotaciones)");
+        reactive.setFocusable(false);
+        reactive.setBorder(null);
+        reactive.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        reactive.setSelected(false);
+        reactive.setVisible(false);
+        reactive.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                views.setReactive(reactive.isSelected());
+                views.repaint();
+                repaint();
+            }
+        });
         
         Action aRes=new AbstractAction("", new ImageIcon(getClass().getResource("/img/ResBtn.png"))){
             public void actionPerformed(ActionEvent arg0) {
-                f.reset();
+                f.reset(); 
                 sldS.setValue(5500);
                 lblDist.setText("5500");
                 sldX.setValue(0);
                 sldY.setValue(0);
                 sldZ.setValue(0);
+                solidBtn.setSelected(false);
                 repaint();
             }};
+        aRes.putValue(Action.SHORT_DESCRIPTION,"Estaurar figura a su estado original");
         JButton btnRes = new JButton(aRes);
         constButton(getClass().getResource("/img/ResBtnH.png"),   btnRes);
         toolBar.add(btnRes);
 
+        JPanel space1 = new JPanel();
+        space1.setMaximumSize(new Dimension(30,10));
+        space1.setBackground(getBackground());
+        toolBar.add(space1);
+        
+        JPanel refButtons = new JPanel();
+        refButtons.setBorder(new TitledBorder(new LineBorder(new Color(230,230,230), 3, true), "Reflejar", TitledBorder.CENTER, TitledBorder.TOP, new Font("Arial",Font.BOLD,13), new Color(150,150,150)));
+        refButtons.setMaximumSize(new Dimension(240,70));
+        toolBar.add(refButtons);
+            
+        Action aRef1=new AbstractAction("", new ImageIcon(getClass().getResource("/img/Ref1.png"))){
+            public void actionPerformed(ActionEvent arg0) {
+                f.scale(1,-1,1);
+                repaint();
+            }};
+        aRef1.putValue(Action.SHORT_DESCRIPTION,"Reflejar figura");
+        JToggleButton btnRef1 = new JToggleButton(aRef1);
+        constButton(getClass().getResource("/img/Ref1H.png"),   btnRef1);
+        btnRef1.setBorder(new EmptyBorder(0,5,0,5));
+        refButtons.add(btnRef1);
+
+        Action aRef2=new AbstractAction("", new ImageIcon(getClass().getResource("/img/Ref3.png"))){
+            public void actionPerformed(ActionEvent arg0) {
+                f.scale(1,1,-1);
+                repaint();
+            }};
+        aRef2.putValue(Action.SHORT_DESCRIPTION,"Reflejar figura");
+        JToggleButton btnRef2 = new JToggleButton(aRef2);
+        constButton(getClass().getResource("/img/Ref3H.png"),   btnRef2);
+        btnRef2.setBorder(new EmptyBorder(0,5,0,5));
+        refButtons.add(btnRef2);
+
+        Action aRef3=new AbstractAction("", new ImageIcon(getClass().getResource("/img/Ref2.png"))){
+            public void actionPerformed(ActionEvent arg0) {
+                f.scale(-1,1,1);
+                repaint();
+            }};
+        aRef3.putValue(Action.SHORT_DESCRIPTION,"Reflejar figura");
+        JToggleButton btnRef3 = new JToggleButton(aRef3);
+        constButton(getClass().getResource("/img/Ref2H.png"),   btnRef3);
+        btnRef3.setBorder(new EmptyBorder(0,5,0,5));
+        refButtons.add(btnRef3);
+
+
+        JPanel space2 = new JPanel();
+        space2.setMaximumSize(new Dimension(30,10));
+        space2.setBackground(getBackground());
+        toolBar.add(space2);
+        
+        JPanel scaButtons = new JPanel();
+        scaButtons.setBorder(new TitledBorder(new LineBorder(new Color(230,230,230), 3, true), "Escalar", TitledBorder.CENTER, TitledBorder.TOP, new Font("Arial",Font.BOLD,13), new Color(150,150,150)));
+        scaButtons.setMaximumSize(new Dimension(115,70));
+        toolBar.add(scaButtons);
+
+        Action aSca1=new AbstractAction("", new ImageIcon(getClass().getResource("/img/Sca1.png"))){
+            public void actionPerformed(ActionEvent arg0) {
+                f.scale(1.1);
+                repaint();
+            }};
+        aSca1.putValue(Action.SHORT_DESCRIPTION,"Hacer la figura 10% más grande");
+        JButton btnSca1 = new JButton(aSca1);
+        constButton(getClass().getResource("/img/Sca1H.png"),   btnSca1);
+        btnSca1.setBorder(new EmptyBorder(0,5,0,5));
+        scaButtons.add(btnSca1);
+
+        Action aSca2=new AbstractAction("", new ImageIcon(getClass().getResource("/img/Sca2.png"))){
+            public void actionPerformed(ActionEvent arg0) {
+                f.scale(0.9);
+                repaint();
+            }};
+        aSca2.putValue(Action.SHORT_DESCRIPTION,"Hacer la figura 10% más pequeña");
+        JButton btnSca2 = new JButton(aSca2);
+        constButton(getClass().getResource("/img/Sca2H.png"),   btnSca2);
+        btnSca2.setBorder(new EmptyBorder(0,5,0,5));
+        scaButtons.add(btnSca2);
+        
+        JPanel space3 = new JPanel();
+        space3.setBackground(getBackground());
+        space3.setMaximumSize(new Dimension(210,10));
+        toolBar.add(space3);
+        toolBar.add(solidBtn);
+
+        JPanel space4 = new JPanel();
+        space4.setBackground(getBackground());
+        space4.setMaximumSize(new Dimension(40,10));
+        toolBar.add(space4);
+        toolBar.add(showBtn);
+
+        JPanel space5 = new JPanel();
+        space5.setBackground(getBackground());
+        space5.setMaximumSize(new Dimension(30,10));
+        toolBar.add(space5);
+        toolBar.add(reactive);
         
 
         toolBar.setFloatable(false);
         win.add(toolBar, BorderLayout.NORTH);
     }
 
+    private void setDialogLocation(){
+        //Error al inicio por tratar de leer la posición sin tener el frame en ventana
+        try {
+            Point p = win.getLocationOnScreen();
+            int x = (int)p.getX()-100;
+            int y = (int)p.getY()+130;
+            views.dialog.setLocation(x,y);
+        } catch (IllegalComponentStateException e) {}
+    }
+
     private void constButton(URL url, JButton btn){
-        btn.setBackground(new Color(200,200,200));
+        btn.setBackground(getBackground());
         btn.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setRolloverIcon(new ImageIcon(url));
+    }
+    private void constButton(URL url, JToggleButton btn){
+        btn.setSelectedIcon(new ImageIcon(url));
+        btn.setFocusable(false);
+        btn.setSelected(false);
+        btn.setBackground(getBackground());
+        btn.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     @Override
@@ -275,6 +456,8 @@ public class Home extends JPanel implements ChangeListener{
         // f.vistaLat(g);
         // f.vistaFro(g);
         f.paint(g2);
+        if(reactive.isSelected())
+            views.repaint();
         if(move){
             Font f = new Font("Arial",Font.PLAIN,10);
             g2.setFont(f);
@@ -290,9 +473,12 @@ public class Home extends JPanel implements ChangeListener{
         
     }
 
+    
+
     @Override
     public void stateChanged(ChangeEvent e) {
         f.rotate(sldX.getValue(), sldY.getValue(), sldZ.getValue());
         repaint();
     }
+
 }
