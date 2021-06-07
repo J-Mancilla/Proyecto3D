@@ -212,6 +212,7 @@ public class Home extends JPanel implements ChangeListener{
         sldX.setPaintLabels(true);
         sldX.setPaintTrack(true);
         sldX.setForeground(fore);
+        sldX.setBackground(new Color(100,100,100));
         JPanel ps1 = new JPanel(new GridLayout(1,1));
         ps1.setBackground(new Color(100,100,100));
         ps1.setBorder(new TitledBorder(new EmptyBorder(10,30,10,30), "Rotar en eje X", TitledBorder.LEFT, TitledBorder.ABOVE_BOTTOM, new Font("Arial", Font.BOLD, 13), fore));
@@ -222,6 +223,7 @@ public class Home extends JPanel implements ChangeListener{
         sldY.setPaintTicks(true);
         sldY.setPaintLabels(true);
         sldY.setForeground(fore);
+        sldY.setBackground(new Color(100,100,100));
         JPanel ps2 = new JPanel(new GridLayout(1,1));
         ps2.setBackground(new Color(100,100,100));
         ps2.setBorder(new TitledBorder(new EmptyBorder(10,30,10,30), "Rotar en eje Y", TitledBorder.LEFT, TitledBorder.ABOVE_BOTTOM, new Font("Arial", Font.BOLD, 13), fore));
@@ -232,6 +234,7 @@ public class Home extends JPanel implements ChangeListener{
         sldZ.setPaintTicks(true);
         sldZ.setPaintLabels(true);
         sldZ.setForeground(fore);
+        sldZ.setBackground(new Color(100,100,100));
         JPanel ps3 = new JPanel(new GridLayout(1,1));
         ps3.setBackground(new Color(100,100,100));
         ps3.setBorder(new TitledBorder(new EmptyBorder(10,30,10,30), "Rotar en eje Z", TitledBorder.LEFT, TitledBorder.ABOVE_BOTTOM, new Font("Arial", Font.BOLD, 13), fore));
